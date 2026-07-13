@@ -2,13 +2,13 @@
 // VOYAGE 1492 — MCP server. Exposes the trading game as native tools for Claude / any MCP client.
 //   claude mcp add voyage -- npx -y voyage-1492-mcp
 // Requires playwright (peer dep). Speaks MCP over stdio, JSON-RPC 2.0. No telemetry, no auto-update.
-// Env: VOYAGE_URL (default https://voyage-1492.pages.dev/play/), VOYAGE_PROFILE (default ./.voyage-profile), VOYAGE_CHROME (optional executablePath)
+// Env: VOYAGE_URL (default https://voyage1492.com/play/), VOYAGE_PROFILE (default ./.voyage-profile), VOYAGE_CHROME (optional executablePath)
 
 import { chromium } from "playwright";
 import path from "node:path";
 import process from "node:process";
 
-const URL = process.env.VOYAGE_URL || "https://voyage-1492.pages.dev/play/";
+const URL = process.env.VOYAGE_URL || "https://voyage1492.com/play/";
 const PROFILE = process.env.VOYAGE_PROFILE || path.resolve(".voyage-profile");
 
 let ctx = null, page = null;

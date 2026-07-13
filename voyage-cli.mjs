@@ -11,13 +11,13 @@
 //   node voyage-cli.mjs advance 10
 //   node voyage-cli.mjs result
 //
-// Env: VOYAGE_URL (default https://voyage-1492.pages.dev/play/), VOYAGE_PROFILE (default ./.voyage-profile)
+// Env: VOYAGE_URL (default https://voyage1492.com/play/), VOYAGE_PROFILE (default ./.voyage-profile)
 
 import { chromium } from "playwright";
 import path from "node:path";
 import process from "node:process";
 
-const URL = process.env.VOYAGE_URL || "https://voyage-1492.pages.dev/play/";
+const URL = process.env.VOYAGE_URL || "https://voyage1492.com/play/";
 const PROFILE = process.env.VOYAGE_PROFILE || path.resolve(".voyage-profile");
 const [, , cmd, ...rest] = process.argv;
 

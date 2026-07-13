@@ -3,7 +3,7 @@
 A single-file, browser-based trading strategy game where **your local LLM runs the show**.
 FM2008-style management × Age of Discovery trading, with a living economy.
 
-**Play now:** https://voyage-1492.pages.dev (EN / 한국어)
+**Play now:** https://voyage1492.com (EN / 한국어)
 
 - 🧠 **BYO-LLM** — point it at your local Ollama (`?ollama=<host>`); the brain haggles, plans routes, and answers your orders in character
 - 📉 **Living economy** — stock-based prices, trade slippage, event chains (famine, war, plague)
