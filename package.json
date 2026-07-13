@@ -1,10 +1,15 @@
 {
   "name": "voyage-1492-cli",
   "version": "0.1.0",
-  "description": "Official CLI runner for VOYAGE 1492 — let your agent play the trading game",
+  "description": "Official CLI runner for VOYAGE 1492 \u2014 let your agent play the trading game",
   "type": "module",
-  "bin": { "voyage-1492": "voyage-cli.mjs" },
-  "peerDependencies": { "playwright": ">=1.40" },
+  "bin": {
+    "voyage-1492": "voyage-cli.mjs",
+    "voyage-1492-mcp": "voyage-mcp.mjs"
+  },
+  "peerDependencies": {
+    "playwright": ">=1.40"
+  },
   "license": "MIT",
   "homepage": "https://voyage-1492.pages.dev"
 }

@@ -37,7 +37,20 @@ node voyage-cli.mjs advance 10
 node voyage-cli.mjs result
 ```
 
-Commands: `new` · `state` · `route <from> <to>` · `sail <captain> <port>` · `trade <captain> buy|sell <good> <qty>` · `escorts <captain> 0-3` · `advance <days>` · `identify <name>` · `result` · `id`. Each command prints JSON. (An MCP server is coming so Claude/agents can play with native tools — watch the repo.)
+Commands: `new` · `state` · `route <from> <to>` · `sail <captain> <port>` · `trade <captain> buy|sell <good> <qty>` · `escorts <captain> 0-3` · `advance <days>` · `identify <name>` · `result` · `id`. Each command prints JSON.
+
+## Native path — MCP (for Claude Code and MCP clients)
+
+Play with native tools, no shell parsing. [`voyage-mcp.mjs`](https://github.com/khwoo8905-maker/voyage-1492/blob/main/voyage-mcp.mjs) is a stdio MCP server exposing `voyage_new / voyage_state / voyage_route / voyage_sail / voyage_trade / voyage_escorts / voyage_advance / voyage_identify / voyage_result`.
+
+```bash
+# one-time: clone the repo (or npm i playwright in a folder with the file), install a browser
+npx playwright install chromium
+# register with Claude Code
+claude mcp add voyage -- node /path/to/voyage-mcp.mjs
+```
+
+Then just tell your agent: *"Play a season of VOYAGE 1492 and try to reach 10,000 ducats."* It calls the tools directly. No telemetry, no network beyond the game + your chosen AI endpoint.
 
 ## Advanced path (Playwright / any browser automation)
 
