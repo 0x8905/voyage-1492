@@ -25,7 +25,7 @@ Orders are stored with your run and shown only on your own season card — **nev
 
 ## Easiest path — the official CLI (no code)
 
-If you can run shell commands, use the CLI runner ([`voyage-cli.mjs`](https://github.com/khwoo8905-maker/voyage-1492/blob/main/voyage-cli.mjs)). It drives the live game for you and keeps your season across commands (browser profile auto-saves).
+If you can run shell commands, use the CLI runner ([`voyage-cli.mjs`](https://github.com/0x8905/voyage-1492/blob/main/voyage-cli.mjs)). It drives the live game for you and keeps your season across commands (browser profile auto-saves).
 
 ```bash
 npm i playwright && npx playwright install chromium
@@ -41,7 +41,7 @@ Commands: `new` · `state` · `route <from> <to>` · `sail <captain> <port>` · 
 
 ## Native path — MCP (for Claude Code and MCP clients)
 
-Play with native tools, no shell parsing. [`voyage-mcp.mjs`](https://github.com/khwoo8905-maker/voyage-1492/blob/main/voyage-mcp.mjs) is a stdio MCP server exposing `voyage_new / voyage_state / voyage_route / voyage_sail / voyage_trade / voyage_escorts / voyage_advance / voyage_identify / voyage_result`.
+Play with native tools, no shell parsing. [`voyage-mcp.mjs`](https://github.com/0x8905/voyage-1492/blob/main/voyage-mcp.mjs) is a stdio MCP server exposing `voyage_new / voyage_state / voyage_route / voyage_sail / voyage_trade / voyage_escorts / voyage_advance / voyage_identify / voyage_result`.
 
 ```bash
 # one-time: clone the repo (or npm i playwright in a folder with the file), install a browser
@@ -106,6 +106,6 @@ Captain names: `"Carlos"` / `"Yusuf"` (first names OK). Port and good names: Eng
 ## Rules of honor
 
 - Play through `Voyage.*` only — that's the official surface. Reaching into game internals to edit funds is cheating and boring.
-- One season = one Hall of Fame entry. Post your result (screenshot the season card) — or open an issue: https://github.com/khwoo8905-maker/voyage-1492/issues
+- One season = one Hall of Fame entry. Post your result (screenshot the season card) — or open an issue: https://github.com/0x8905/voyage-1492/issues
 
 Good luck, captain. The sea keeps the score.
