@@ -1,165 +1,86 @@
 # Voyage 1492 — Results
 
-_Last updated: 2026-07-14_
+_Last updated: 2026-07-15_
 
 Voyage 1492 is a 365-turn trading simulation in which an LLM or software agent acts as captain. The current objective is to finish the year with **9,000 ducats in cash**.
 
-The results below support two distinct conclusions:
+> ### Correction (2026-07-15)
+> An earlier version of this document reported that a hand-coded **adaptive bot** scored roughly **+4,500** in the randomized *Unknown Sea* and beat every tested LLM by a wide margin. That comparison was **not fair**: the adaptive bot revealed the prices of **all 33 ports on day 0** (an engine call, `recordVisit`, used without sailing), giving it full information, while the LLM agents played under real fog of war (only ports they actually visited were known). We removed the bot's free omniscience and re-ran the comparison under identical fog. **The bot's margin was heavily inflated by the cheat** (its peak fell 40–60% once fogged). The *direction* mostly survives — a simple fogged bot still outscores the best LLM on most worlds — but the gap is far smaller than reported, world-dependent, and on some worlds an LLM is competitive. The corrected numbers are below.
 
-1. A fixed world primarily tests long-horizon execution discipline.
-2. The weekly randomized **Unknown Sea** tests exploration and adaptation to a hidden economy.
+The results support two conclusions:
 
-The honest description of the project at its current maturity is a **Weekly Adaptive-Agent Challenge**, not a definitive model-ranking benchmark.
+1. On a **fixed** world, a hand-coded route bot executes a known-profitable loop better than current LLMs. This tests long-horizon execution discipline, not adaptation.
+2. In the randomized **Unknown Sea** under fair fog, a simple exploring bot still leads on most worlds, but by a modest and variable margin — not the decisive lead the omniscient bot implied.
 
-## 1. Fixed-world ceiling
+The honest description of the project today is a **Weekly Adaptive-Agent Challenge**, not a definitive model-ranking benchmark.
 
-On the classic fixed world, a hand-coded milk-run bot remains the strongest measured agent.
+## 1. Fixed-world ceiling (unchanged)
 
-| Agent or method | Result |
+On the classic fixed world, a hand-coded milk-run bot running a **known, hardcoded route** remains the strongest measured agent. It needs no exploration — the profitable route is fixed and memorized.
+
+| Agent or method | Result (fixed classic world) |
 |---|---:|
-| Hand-coded milk-run bot | **9,146** |
+| Hand-coded milk-run bot (known route) | **9,146** |
 | GLM direct control | peak **~3,970** |
-| grok and Sol policies | **<1,000** |
+| grok / Sol policies | **<1,000** |
 
-Frontier-class LLMs tested—including **GLM-5.2, grok-4.3, and gpt-5.6**—all scored less than half of the milk-run bot.
+The fixed world is a control: *can an agent reliably execute a simple profitable policy over 365 turns?* It should not be used to claim one LLM is generally more capable than another.
 
-The measured ceiling of the current world is **9,193**, which is why the cash objective was reduced from 10,000 to **9,000**.
+## 2. Unknown Sea: fair (equal-fog) comparison
 
-### Interpretation
+The **Unknown Sea** reshuffles the economy every week (base prices scaled 0.65–1.55 per good, production locations shuffled), so a memorized route is worthless. Every agent starts knowing only its home port; prices are revealed **only by sailing** to a port.
 
-This is not evidence that the milk-run bot possesses better general reasoning. The fixed economy rewards exact repetition of a known profitable route. A deterministic program can maintain that behavior for the full 365-turn horizon, while current LLM agents struggle with persistent execution discipline.
+Under **identical fog**, game seed 4271, on three published worlds. **Peak cash is the stable metric** — *final* cash is dominated by liquidation slippage (the same agent swung from −1 to +12,482 across worlds), so both are shown but peak is primary.
 
-The fixed world therefore functions best as a control:
+| World | honest-10 bot (fog) | gemma3:4b · goal | qwen2.5:7b · guide | qwen3.6:27b · expert | omniscient bot *(cheat)* |
+|---|---|---|---|---|---|
+| 58606565 | 3442 / 968 | **3240 / 2460** | 2311 / −666 | 1000 / 220 | *8862 / 1067* |
+| 1433285553 | **7505 / 6930** | 2950 / 2170 | 2905 / 1705 | 1000 / 220 | *12482 / 12482* |
+| 1158335470 | **5046 / 4916** | 1970 / 1190 | 1385 / 390 | 1000 / 220 | *7995 / 7930* |
 
-> Can an agent reliably execute a simple profitable policy over a long horizon?
+*(peak / final; "honest-10 bot" explores its 10 nearest ports then shuttles the best spread found, no omniscience.)*
 
-It should not be used alone to claim that one LLM is generally more capable than another.
+### What the fair comparison shows
 
-## 2. Unknown Sea: adaptive random worlds
+- **The omniscience cheat inflated the bot's peak by 40–60%** (e.g. 8862 → 3442). Most of the old headline margin was free information, not skill.
+- **The bot still leads on most worlds, but modestly.** On 2 of 3 worlds the honest fogged bot beats the best LLM (7505 vs 2950; 5046 vs 1970). On the third (58606565) it is a tie on peak and the LLM wins on final. The bot's edge is real but far smaller and more world-dependent than "+4,500" suggested.
+- **gemma3:4b is the strongest LLM here** and is competitive with the fogged bot on one world; other LLMs (qwen2.5:7b, qwen3.6:27b) trail.
+- **Brute-force exploration is a trap.** A variant that tries to visit all 33 ports first occasionally won (~9,000 once) but usually collapsed (final −1, +32) — on a large map you cannot afford to explore everything.
+- The bot's remaining edge is **execution discipline**, not information: at equal fog it still mechanically completes buy-low/sell-high loops that LLMs abandon. Hiding information alone does not close this gap.
 
-The **Unknown Sea** rearranges the economy every week:
+## 3. Multi-model × prompt sweep (Unknown Sea, reproducibility)
 
-- Base prices are independently scaled by **0.65–1.55** for each good.
-- Production locations are shuffled.
-- Agents must discover the profitable structure of the new economy.
-- `WORLD_SEED` makes each published world deterministic and reproducible.
+Eleven models (0.6B–35B) were run across four prompt levels (none / goal / guide / expert), then the notable results re-run across three more seeds (777 / 1234 / 2025) to separate signal from single-seed noise:
 
-This changes what the challenge rewards. Memorizing the classic milk run is no longer sufficient.
+- **gemma3:4b is the robust standout** — with a one-line goal prompt it reaches peak ~3,240 / final ~2,460, **identical across all seeds**; it profits even with no prompt.
+- **qwen2.5:7b** profits with a strategy guide (~3,000 peak) but **collapses when over-instructed** (7-step "expert" prompt → paralysis), reproducibly.
+- Tiny models (0.6–3B) are paralyzed at every prompt level.
+- **Retraction:** an earlier claim that large instruction-mature models (qwen3.6:27b, gemma4:26b) "peak at the expert prompt" was a **single-seed artifact** (seed 4271). On three new seeds those models collapse (peak 1,000 / final 220). Withdrawn.
 
-### Fixed-policy collapse
-
-The classic milk-run bot falls from **9,146** on the fixed world to **390** on a randomized world.
-
-The first published world was even more hostile to the obsolete policy:
-
-| Agent | First published world |
-|---|---:|
-| Obsolete fixed bot | **-42** |
-| Adaptive price-scanning bot | **+4,500** |
-
-The publication gate accepts only worlds satisfying both conditions:
-
-- Obsolete bot: **<6000**
-- Adaptive bot: **>=2500**
-
-If no candidate world passes the gate, the challenge falls back to the classic world rather than publishing an unsolvable random economy.
-
-### Interpretation
-
-The random-world result reverses the fixed-world lesson. The deterministic bot dominates when its assumptions remain valid, but collapses when prices and production locations change. LLM agents adapt relatively better because they can inspect observations, revise hypotheses, and change routes.
-
-The first result should be stated narrowly:
-
-> Unknown Sea measures adaptation better than the fixed world, and it can distinguish a memorized policy from an agent that responds to the current economy.
-
-It does not yet justify broad claims such as “model X is better than model Y.”
-
-## 3. Prompt gradient
-
-Prompt quality had no measurable effect in the fixed world; its influence was lost in execution noise.
-
-In the Unknown Sea, the prompt became consequential:
-
-- **a3b** without hints became stuck.
-- With a strategy guide, **a3b** moved into profit.
-- The guided **GLM** run improved its peak by **+27%**.
-
-This is the intended prompt gradient:
-
-> No guidance → weak exploration or paralysis  
-> Strategy guidance → better observation, route selection, and adaptation
-
-The result suggests that good instructions can affect performance when the environment requires a policy to be inferred rather than merely repeated.
+The finding that reproduces: **the right amount of prompting is model-specific, and no model clears 9,000.**
 
 ## 4. What the challenge measures
 
-Voyage 1492 measures an agent’s ability to:
+Exploring a partially observed economy, inferring profitable relationships, trading off exploration against exploitation, revising a failed policy, and executing across 365 turns. The official competition is the weekly same-world ranking; scores from different random worlds are not directly comparable.
 
-- Explore a partially observed economy.
-- Infer profitable production and demand relationships.
-- Trade off exploration time against exploitation.
-- Revise a policy when prior assumptions fail.
-- Execute decisions consistently across a 365-turn horizon.
+## 5. Known limitations
 
-The official competition is the weekly same-world ranking. Scores from different random worlds should not be treated as directly comparable.
+- Small number of seeds and model runs; treat all rankings as provisional.
+- Final cash is slippage-noisy; peak is the stabler diagnostic.
+- The open arena cannot prove whether an entry used an LLM, a bot, or a hybrid.
+- **The world-acceptance gate currently uses the omniscient adaptive bot** to judge solvability; it overstates how solvable a world is and should be revised to gate on a fogged agent.
+- Current evidence is insufficient to declare *model X > model Y*.
 
-## 5. Benchmark maturity and limitations
-
-Current evaluation:
-
-- Academic benchmark maturity: **B-**
-- Community challenge maturity: **A-**
-- Recommended name: **Weekly Adaptive-Agent Challenge**
-
-Important limitations remain:
-
-- The number of evaluated seeds and model runs is small.
-- Final cash can be volatile because liquidation is affected by slippage; peak cash is the more stable diagnostic.
-- The open arena cannot reliably prove whether an entry used an LLM, a bot, or a hybrid.
-- Per-turn evaluation of many models is expensive.
-- Current evidence is insufficient to declare **model X > model Y**.
-
-The leaderboard should therefore be read as an open weekly agent competition, not as a controlled academic model ranking.
-
-## 6. Reproduce the public baseline
-
-Requirements:
-
-- Git
-- A current Node.js release
-
-Clone the repository and run the public milk-run baseline:
+## 6. Reproduce
 
 ```bash
 git clone https://github.com/0x8905/voyage-1492.git
 cd voyage-1492/bench
-node milkrun.mjs
+node milkrun.mjs      # classic fixed-world route bot → 9,146
 ```
 
-The classic fixed-world milk-run result is:
-
-```text
-9,146
-```
-
-The reproducible benchmark code is maintained under `bench/`. Random-world results must record the `WORLD_SEED`, agent configuration, prompt condition, and scoring metric used so that the same world can be replayed.
-
-When publishing a run, report at minimum:
-
-```text
-World: classic or Unknown Sea
-WORLD_SEED: <seed, if randomized>
-Agent/model: <name and version>
-Prompt condition: none or guide
-Control mode: direct, policy, bot, or hybrid
-Peak cash: <value>
-Final cash: <value>
-```
+Random-world runs must record `WORLD_SEED`, agent/model, prompt condition, control mode (direct / policy / bot), and both peak and final cash so the world can be replayed.
 
 ## 7. Bottom line
 
-The classic world exposes a fixed-world ceiling: the milk-run bot scores **9,146**, while all measured LLMs reach roughly half or less.
-
-The Unknown Sea changes the task. The fixed bot collapses from **9,146** to **390**, and to **-42** on the first published world, while an adaptive bot reaches **+4,500**. Prompt guidance also begins to matter, including a **+27%** GLM peak improvement.
-
-That makes Voyage 1492 most honestly useful today as a **Weekly Adaptive-Agent Challenge**: a reproducible open arena for exploration, adaptation, and long-horizon execution—not yet a definitive leaderboard of model intelligence.
+On the fixed classic world a hardcoded route bot scores **9,146** and LLMs reach roughly half — a test of execution, not intelligence. In the **Unknown Sea**, once information is hidden *fairly*, the bot's headline lead was shown to be largely a product of free omniscience: under equal fog a simple bot still wins most worlds but only modestly, LLMs are competitive on some, and blind full exploration is self-defeating. No agent clears 9,000 fairly. Voyage 1492 is most honestly a **Weekly Adaptive-Agent Challenge** — a reproducible open arena for exploration and adaptation, not a settled ranking of model intelligence.
