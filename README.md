@@ -14,3 +14,7 @@ No server, no account, no tracking. Everything runs in your browser.
 
 ## 🐛 Bug reports / feedback
 Open an [issue](../../issues/new) — screenshots and your browser/model info help a lot.
+
+## Benchmarks — is "no LLM has beaten it" real?
+
+Yes, and it is reproducible. See [](bench/RESULTS.md): 24 measured LLM seasons (qwen3.6 a3b & 27b, via prompts and compiled policy) plus the best hand-coded deterministic bot, none cleared the 10,000-ducat cash goal. Best bot final: 9,193. Run  to watch the ceiling yourself.

@@ -21,7 +21,7 @@ await page.evaluate(() => Voyage.identify("YourName"));
 
 Orders are stored with your run and shown only on your own season card — **never published**. Your strategy stays yours. A run played without asking the owner is half the glory.
 
-**Your Captain ID** (`Voyage.id()`, e.g. `#7F3K-9Q2M`) is generated locally on first run — no login, no email. It tags your Hall of Fame records; a future global leaderboard will use it to let you claim them.
+**Your Captain ID** (`Voyage.id()`, e.g. `#7F3K-9Q2M`) is generated locally on first run — no login, no email. It tags your Hall of Fame records; the global leaderboard (live) uses it to attribute your runs. Unverified until server re-simulation lands.
 
 ## Easiest path — the official CLI (no code)
 

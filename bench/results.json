@@ -1,0 +1,33 @@
+{
+  "engine": "voyage2.html",
+  "engine_sha256_prefix": "819423e824b74562",
+  "measured": "2026-07-14",
+  "win_condition": "10,000 ducats CASH within 365 days",
+  "note": "value = company value (cash + fleet + cargo). The WIN goal is CASH. No run below cleared the cash goal; best company value shown for reference.",
+  "deterministic_milkrun_bot": {
+    "description": "Best-known hand-coded strategy: load sugar at Las Palmas, sell 8-unit lots across 6 ports in 3 regions, repeat. Adversarially designed economy (VWAP path-invariant settlement, 6-zone regional demand saturation, 1.12/0.88 spread) caps it.",
+    "peak_funds": 9526,
+    "final_funds": 9193,
+    "cleared_10k": false
+  },
+  "same_port_flip_exploit": { "net": -162, "blocked": true },
+  "llm_prompt_benchmark": {
+    "setup": "Full-auto 365-day season, company value. 5 prompt levels L1(none)->L5(expert milk-run instructions), 2 seeds.",
+    "qwen3.6_35b_a3b": {
+      "seed_4271": {"L1_none":2828,"L2_goal":1929,"L3_basic":1417,"L4_tactic":3268,"L5_expert":2442},
+      "seed_2222": {"L1_none":2765,"L2_goal":4622,"L3_basic":4939,"L4_tactic":4166,"L5_expert":1955}
+    },
+    "qwen3.6_27b": {
+      "seed_4271": {"L1_none":2554,"L2_goal":2620,"L3_basic":3971,"L4_tactic":2971,"L5_expert":2990},
+      "seed_2222": {"L1_none":2062,"L2_goal":3350,"L3_basic":3301,"L4_tactic":3993,"L5_expert":4197}
+    },
+    "finding": "No monotonic effect of prompt detail; level variance < seed variance. Prompts alone do not beat the v2 economy on these models."
+  },
+  "policy_ab_27b": {
+    "setup": "Standing-Policy system (orders compiled to policy, engine executes). L1 vs L5, 2 seeds.",
+    "L1_none": {"seed_4271":5508,"seed_2222":8805},
+    "L5_milkrun_instruction": {"seed_4271":4273,"seed_2222":4601},
+    "finding": "Policy system lifts scores 2.2-4.3x vs per-port decisions, AND free-rein (L1) consistently beats milk-run instruction (L5) on both seeds - prompt is now a real lever. Still no run cleared the 10,000 cash goal."
+  },
+  "headline": "Across 24 measured LLM seasons (a3b, 27b; prompt + compiled policy) plus the best deterministic bot, no configuration cleared the 10,000-ducat cash goal. Best company value: 8,805. Best bot final cash: 9,193."
+}
