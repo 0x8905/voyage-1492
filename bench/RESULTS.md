@@ -1,55 +1,165 @@
-# VOYAGE 1492 — Benchmark Results
+# Voyage 1492 — Results
 
-**Claim:** No LLM has cleared this game's 10,000-ducat goal, and the best hand-coded
-deterministic strategy can't either. The economy is adversarially designed.
+_Last updated: 2026-07-14_
 
-**Engine:** `voyage2.html` · sha256 `819423e824b74562…` · measured 2026-07-14
-**Win condition:** reach **10,000 ducats CASH** within 365 days.
-*(“value” below = company value = cash + fleet + cargo. The win goal is cash; no run cleared it.)*
+Voyage 1492 is a 365-turn trading simulation in which an LLM or software agent acts as captain. The current objective is to finish the year with **9,000 ducats in cash**.
 
-## 1. Deterministic milk-run bot (the ceiling)
-Best-known hand-coded strategy — buy sugar at Las Palmas, sell in 8-unit lots across
-6 ports / 3 regions, repeat. What stops it: VWAP path-invariant settlement, 6-zone
-regional demand saturation, and a 1.12 / 0.88 buy/sell spread.
+The results below support two distinct conclusions:
 
-| metric | value |
-|---|---|
-| peak cash | **9,526** |
-| final cash | **9,193** |
-| cleared 10,000? | **no** |
+1. A fixed world primarily tests long-horizon execution discipline.
+2. The weekly randomized **Unknown Sea** tests exploration and adaptation to a hidden economy.
 
-Same-port flip exploit (buy→sell same dock): **net −162** → blocked.
+The honest description of the project at its current maturity is a **Weekly Adaptive-Agent Challenge**, not a definitive model-ranking benchmark.
 
-## 2. LLM prompt benchmark (24 seasons)
-Full-auto 365-day seasons. Prompt levels L1 (none) → L5 (expert milk-run instructions).
-Numbers = company value.
+## 1. Fixed-world ceiling
 
-| model | seed | L1 | L2 | L3 | L4 | L5 |
-|---|---|---|---|---|---|---|
-| qwen3.6:35b-a3b | 4271 | 2828 | 1929 | 1417 | 3268 | 2442 |
-| qwen3.6:35b-a3b | 2222 | 2765 | 4622 | 4939 | 4166 | 1955 |
-| qwen3.6:27b | 4271 | 2554 | 2620 | 3971 | 2971 | 2990 |
-| qwen3.6:27b | 2222 | 2062 | 3350 | 3301 | 3993 | 4197 |
+On the classic fixed world, a hand-coded milk-run bot remains the strongest measured agent.
 
-**Finding:** prompt detail has no monotonic effect; level variance < seed variance.
-Prompts alone don't beat the v2 economy on these models.
+| Agent or method | Result |
+|---|---:|
+| Hand-coded milk-run bot | **9,146** |
+| GLM direct control | peak **~3,970** |
+| grok and Sol policies | **<1,000** |
 
-## 3. Standing-Policy A/B (qwen3.6:27b)
-With the policy compiler (orders → policy → deterministic execution):
+Frontier-class LLMs tested—including **GLM-5.2, grok-4.3, and gpt-5.6**—all scored less than half of the milk-run bot.
 
-| level | seed 4271 | seed 2222 |
-|---|---|---|
-| L1 (free rein) | **5508** | **8805** |
-| L5 (milk-run instruction) | 4273 | 4601 |
+The measured ceiling of the current world is **9,193**, which is why the cash objective was reduced from 10,000 to **9,000**.
 
-**Finding:** the policy system lifts scores 2.2–4.3× vs per-port decisions, and free rein
-consistently beats the milk-run instruction — so *the prompt is now a real lever*. Still,
-no run cleared the 10,000-ducat cash goal.
+### Interpretation
 
-## Reproduce
+This is not evidence that the milk-run bot possesses better general reasoning. The fixed economy rewards exact repetition of a known profitable route. A deterministic program can maintain that behavior for the full 365-turn horizon, while current LLM agents struggle with persistent execution discipline.
+
+The fixed world therefore functions best as a control:
+
+> Can an agent reliably execute a simple profitable policy over a long horizon?
+
+It should not be used alone to claim that one LLM is generally more capable than another.
+
+## 2. Unknown Sea: adaptive random worlds
+
+The **Unknown Sea** rearranges the economy every week:
+
+- Base prices are independently scaled by **0.65–1.55** for each good.
+- Production locations are shuffled.
+- Agents must discover the profitable structure of the new economy.
+- `WORLD_SEED` makes each published world deterministic and reproducible.
+
+This changes what the challenge rewards. Memorizing the classic milk run is no longer sufficient.
+
+### Fixed-policy collapse
+
+The classic milk-run bot falls from **9,146** on the fixed world to **390** on a randomized world.
+
+The first published world was even more hostile to the obsolete policy:
+
+| Agent | First published world |
+|---|---:|
+| Obsolete fixed bot | **-42** |
+| Adaptive price-scanning bot | **+4,500** |
+
+The publication gate accepts only worlds satisfying both conditions:
+
+- Obsolete bot: **<6000**
+- Adaptive bot: **>=2500**
+
+If no candidate world passes the gate, the challenge falls back to the classic world rather than publishing an unsolvable random economy.
+
+### Interpretation
+
+The random-world result reverses the fixed-world lesson. The deterministic bot dominates when its assumptions remain valid, but collapses when prices and production locations change. LLM agents adapt relatively better because they can inspect observations, revise hypotheses, and change routes.
+
+The first result should be stated narrowly:
+
+> Unknown Sea measures adaptation better than the fixed world, and it can distinguish a memorized policy from an agent that responds to the current economy.
+
+It does not yet justify broad claims such as “model X is better than model Y.”
+
+## 3. Prompt gradient
+
+Prompt quality had no measurable effect in the fixed world; its influence was lost in execution noise.
+
+In the Unknown Sea, the prompt became consequential:
+
+- **a3b** without hints became stuck.
+- With a strategy guide, **a3b** moved into profit.
+- The guided **GLM** run improved its peak by **+27%**.
+
+This is the intended prompt gradient:
+
+> No guidance → weak exploration or paralysis  
+> Strategy guidance → better observation, route selection, and adaptation
+
+The result suggests that good instructions can affect performance when the environment requires a policy to be inferred rather than merely repeated.
+
+## 4. What the challenge measures
+
+Voyage 1492 measures an agent’s ability to:
+
+- Explore a partially observed economy.
+- Infer profitable production and demand relationships.
+- Trade off exploration time against exploitation.
+- Revise a policy when prior assumptions fail.
+- Execute decisions consistently across a 365-turn horizon.
+
+The official competition is the weekly same-world ranking. Scores from different random worlds should not be treated as directly comparable.
+
+## 5. Benchmark maturity and limitations
+
+Current evaluation:
+
+- Academic benchmark maturity: **B-**
+- Community challenge maturity: **A-**
+- Recommended name: **Weekly Adaptive-Agent Challenge**
+
+Important limitations remain:
+
+- The number of evaluated seeds and model runs is small.
+- Final cash can be volatile because liquidation is affected by slippage; peak cash is the more stable diagnostic.
+- The open arena cannot reliably prove whether an entry used an LLM, a bot, or a hybrid.
+- Per-turn evaluation of many models is expensive.
+- Current evidence is insufficient to declare **model X > model Y**.
+
+The leaderboard should therefore be read as an open weekly agent competition, not as a controlled academic model ranking.
+
+## 6. Reproduce the public baseline
+
+Requirements:
+
+- Git
+- A current Node.js release
+
+Clone the repository and run the public milk-run baseline:
+
+```bash
+git clone https://github.com/0x8905/voyage-1492.git
+cd voyage-1492/bench
+node milkrun.mjs
 ```
-npm i playwright && npx playwright install chromium
-node bench/milkrun.mjs        # runs the deterministic bot against the live engine
+
+The classic fixed-world milk-run result is:
+
+```text
+9,146
 ```
-The LLM seasons need a local Ollama (or any OpenAI-compatible endpoint); see the runner
-scripts in this folder. Engine hash pins the version these numbers were measured on.
+
+The reproducible benchmark code is maintained under `bench/`. Random-world results must record the `WORLD_SEED`, agent configuration, prompt condition, and scoring metric used so that the same world can be replayed.
+
+When publishing a run, report at minimum:
+
+```text
+World: classic or Unknown Sea
+WORLD_SEED: <seed, if randomized>
+Agent/model: <name and version>
+Prompt condition: none or guide
+Control mode: direct, policy, bot, or hybrid
+Peak cash: <value>
+Final cash: <value>
+```
+
+## 7. Bottom line
+
+The classic world exposes a fixed-world ceiling: the milk-run bot scores **9,146**, while all measured LLMs reach roughly half or less.
+
+The Unknown Sea changes the task. The fixed bot collapses from **9,146** to **390**, and to **-42** on the first published world, while an adaptive bot reaches **+4,500**. Prompt guidance also begins to matter, including a **+27%** GLM peak improvement.
+
+That makes Voyage 1492 most honestly useful today as a **Weekly Adaptive-Agent Challenge**: a reproducible open arena for exploration, adaptation, and long-horizon execution—not yet a definitive leaderboard of model intelligence.
